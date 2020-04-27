@@ -2,15 +2,76 @@ import React from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 import { Linking } from "expo";
 import { NavigationContainer, RouteProp } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   createStackNavigator,
   StackNavigationProp,
 } from "@react-navigation/stack";
 
+const Tabs = createBottomTabNavigator();
+
+function RootTabs() {
+  return (
+    <Tabs.Navigator>
+      <Tabs.Screen name="HomeTab" component={HomeStack} />
+      <Tabs.Screen name="SettingsTab" component={HomeStack} />
+    </Tabs.Navigator>
+  );
+}
+
+const Stack = createStackNavigator<HomeStackParams>();
+
+function HomeStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="Details" component={Details} />
+    </Stack.Navigator>
+  );
+}
+
+export default function App() {
+  const linking = {
+    prefixes: [Linking.makeUrl("/")],
+    config: {
+      HomeTab: {
+        initialRouteName: "Home",
+        screens: {
+          Home: "home",
+          Details: {
+            path: "home/:id",
+            parse: {
+              id: Number,
+            },
+          },
+        },
+      },
+      SettingsTab: {
+        initialRouteName: "Home",
+        screens: {
+          Home: "settings",
+          Details: {
+            path: "settings/:id",
+            parse: {
+              id: Number,
+            },
+          },
+        },
+      },
+    },
+  };
+
+  return (
+    <NavigationContainer linking={linking} fallback={<Text>Loading!</Text>}>
+      <RootTabs />
+    </NavigationContainer>
+  );
+}
+
 function Home({
   navigation,
 }: {
-  navigation: StackNavigationProp<RootStackParams, "Home">;
+  navigation: StackNavigationProp<HomeStackParams, "Home">;
 }) {
   return (
     <View style={styles.container}>
@@ -23,7 +84,7 @@ function Home({
   );
 }
 
-type RootStackParams = {
+type HomeStackParams = {
   Home: undefined;
   Details: { id: number };
 };
@@ -32,31 +93,18 @@ function Details({
   navigation,
   route,
 }: {
-  navigation: StackNavigationProp<RootStackParams, "Details">;
-  route: RouteProp<RootStackParams, "Details">;
+  navigation: StackNavigationProp<HomeStackParams, "Details">;
+  route: RouteProp<HomeStackParams, "Details">;
 }) {
   return (
     <View style={styles.container}>
       <Text>Details: {route.params.id}</Text>
-      <Button title="Go back" onPress={() => navigation.goBack()} />
+      {navigation.canGoBack() ? (
+        <Button title="Go back" onPress={() => navigation.goBack()} />
+      ) : (
+        <Button title="Go home" onPress={() => navigation.replace("Home")} />
+      )}
     </View>
-  );
-}
-
-const Stack = createStackNavigator<RootStackParams>();
-
-export default function App() {
-  const linking = {
-    prefixes: [Linking.makeUrl("/")],
-  };
-
-  return (
-    <NavigationContainer linking={linking} fallback={<Text>Loading!</Text>}>
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Details" component={Details} />
-      </Stack.Navigator>
-    </NavigationContainer>
   );
 }
 

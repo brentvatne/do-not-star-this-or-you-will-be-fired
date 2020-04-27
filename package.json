@@ -30,5 +30,8 @@
     "babel-preset-expo": "~8.1.0",
     "typescript": "~3.8.3"
   },
+  "resolutions": {
+    "@react-navigation/core": "5.0.0-web.0"
+  },
   "private": true
 }
